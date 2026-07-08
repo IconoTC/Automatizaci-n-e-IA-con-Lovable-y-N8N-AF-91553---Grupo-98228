@@ -1,0 +1,77 @@
+{
+  "name": "05 Telegram Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0a2e0116-d973-44bd-bb7a-85f50e7e9c2f",
+      "name": "Telegram Trigger",
+      "webhookId": "c8141515-0586-4466-9033-0ebcd09f6ea0",
+      "credentials": {
+        "telegramApi": {
+          "id": "coJg7DALcGqlTVrX",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8152105630",
+        "text": "Mensaje recibido, ¡gracias!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4c3830a7-4b51-4a92-b40a-25d2b58a9884",
+      "name": "Send a text message",
+      "webhookId": "54e4f67b-84f4-4a21-a17a-61fdb1dd1dda",
+      "credentials": {
+        "telegramApi": {
+          "id": "coJg7DALcGqlTVrX",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5a78afc1-e9cb-435c-836b-975cee0eacc5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64482d7a14e81689aaebbf703d54e87c821063e375e43c30ccc74d502f1236a9"
+  },
+  "nodeGroups": [],
+  "id": "kCYMhkENy6uXv7ro",
+  "tags": []
+}
