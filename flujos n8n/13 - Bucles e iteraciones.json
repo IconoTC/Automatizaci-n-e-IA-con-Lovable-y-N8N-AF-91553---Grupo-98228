@@ -1,0 +1,282 @@
+{
+  "name": "13 - Bucles e iteraciones",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        112
+      ],
+      "id": "4d84ede1-2762-40a2-9ebf-f7f5df075806",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://github.com/gakudo-ai/open-datasets/raw/refs/heads/main/asia_documents.zip",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -512,
+        112
+      ],
+      "id": "255e946f-465f-4ca8-9b11-1fae58f505f5",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        112
+      ],
+      "id": "81742326-d9ea-4a2a-a402-aed684c7912b",
+      "name": "Compression"
+    },
+    {
+      "parameters": {
+        "jsCode": "const nuevosItems = [];\nconst itemsEntrada = $input.all();\n\n// Recorremos los items usando un índice (necesario para la función de n8n)\nfor (let i = 0; i < itemsEntrada.length; i++) {\n  const item = itemsEntrada[i];\n  \n  if (item.binary) {\n    for (const key of Object.keys(item.binary)) {\n      \n      // Utilizamos la herramienta nativa de n8n para obtener el archivo de forma segura, \n      // independientemente de si está en memoria o en disco.\n      const buffer = await this.helpers.getBinaryDataBuffer(i, key);\n      \n      // Ahora sí, convertimos el buffer real a texto\n      const textoDecodificado = buffer.toString('utf-8');\n      \n      nuevosItems.push({\n        json: {\n          nombre_archivo: item.binary[key].fileName || key,\n          contenido_texto: textoDecodificado\n        }\n      });\n    }\n  }\n}\n\nreturn nuevosItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        112
+      ],
+      "id": "a78fdbbe-95e2-4170-acdf-bd82f174b085",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        112,
+        112
+      ],
+      "id": "6f987c46-dc4f-4f15-a649-d50c18faedcc",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "content": "**Nodo de bucle**\nLa opción 'Batch Size' indica cuántos items procesar en cada iteración. Por defecto vale 1, lo que significa \"ir de 1 en 1\".",
+        "height": 112,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "bcd57cdf-f6da-4648-b352-5768c99df455",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9a7c9966-f617-4561-a789-ad18aefa940a",
+              "leftValue": "={{ $json.contenido_texto }}",
+              "rightValue": "beach",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        272
+      ],
+      "id": "605299b6-f511-46ea-9dc5-3cf428772ca0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "afd047d1-231d-4e4e-98c0-9d84a12fe8e4",
+              "name": "categoria",
+              "value": "relevante",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        272
+      ],
+      "id": "809a097f-bb7e-4562-b819-9cb629f68394",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e7fd25e4-f8af-42ad-a60f-02316231efd1",
+              "name": "categoria",
+              "value": "irrelevante",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        432
+      ],
+      "id": "0059b83b-1372-4c6c-bace-de5b85b7dd8b",
+      "name": "Edit Fields1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Compression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compression": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3ca02be7-24cc-49b8-9bac-b334ea65465a",
+  "meta": {
+    "instanceId": "64482d7a14e81689aaebbf703d54e87c821063e375e43c30ccc74d502f1236a9"
+  },
+  "nodeGroups": [],
+  "id": "XAOWRgcuOZt2XW9U",
+  "tags": []
+}

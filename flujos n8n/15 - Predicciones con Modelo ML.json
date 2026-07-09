@@ -1,0 +1,262 @@
+{
+  "name": "15 - Predicciones con Modelo ML",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://ivanpc86-ml-iris.hf.space/predict",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "sepal_length",
+              "value": "={{ $json.sepal_length }}"
+            },
+            {
+              "name": "sepal_width",
+              "value": "={{ $json.sepal_width }}"
+            },
+            {
+              "name": "petal_length",
+              "value": "={{ $json.petal_length }}"
+            },
+            {
+              "name": "petal_width",
+              "value": "={{ $json.petal_width }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        -176
+      ],
+      "id": "9730b199-ad02-4403-8709-53244b9d6da8",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -16
+      ],
+      "id": "5a5f5593-61cc-4870-8589-bd0ccf5cbd7f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1QZDs-AgaA-dXGF09G28kvWpTgg13chBCbTgcjeArnjA",
+          "mode": "list",
+          "cachedResultName": "synthetic_iris_data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QZDs-AgaA-dXGF09G28kvWpTgg13chBCbTgcjeArnjA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QZDs-AgaA-dXGF09G28kvWpTgg13chBCbTgcjeArnjA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "class_name": "={{ $json.class_name }}",
+            "row_number": "={{ $('lectura').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "sepal_length",
+              "displayName": "sepal_length",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sepal_width",
+              "displayName": "sepal_width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "petal_length",
+              "displayName": "petal_length",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "petal_width",
+              "displayName": "petal_width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "class_id",
+              "displayName": "class_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "class_name",
+              "displayName": "class_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        512,
+        -80
+      ],
+      "id": "85428d7c-8f23-46f1-98a5-ce020c9a3708",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QJqTX3ZCxp0KGQ7m",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1QZDs-AgaA-dXGF09G28kvWpTgg13chBCbTgcjeArnjA",
+          "mode": "list",
+          "cachedResultName": "synthetic_iris_data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QZDs-AgaA-dXGF09G28kvWpTgg13chBCbTgcjeArnjA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QZDs-AgaA-dXGF09G28kvWpTgg13chBCbTgcjeArnjA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        -96
+      ],
+      "id": "c4c8aaa7-884b-49e1-8383-f5411bb661cc",
+      "name": "lectura",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QJqTX3ZCxp0KGQ7m",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "lectura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lectura": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "87f88ff8-d410-444b-a0c2-0fe9fc6b74bd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64482d7a14e81689aaebbf703d54e87c821063e375e43c30ccc74d502f1236a9"
+  },
+  "nodeGroups": [],
+  "id": "CyRzvxuHysnS2Vgm",
+  "tags": []
+}

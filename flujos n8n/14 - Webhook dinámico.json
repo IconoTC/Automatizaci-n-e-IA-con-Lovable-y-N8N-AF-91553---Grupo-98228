@@ -1,0 +1,95 @@
+{
+  "name": "14 - Webhook dinámico",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "saludo-dinamico2",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5253c504-1726-4fc8-b97f-135db56b8730",
+      "name": "Webhook",
+      "webhookId": "1dbe440e-90a9-4861-9c5e-f73c0661ad08"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a3b70b36-23b3-4153-b535-351ccfe775f5",
+              "name": "mensaje_final",
+              "value": "=¡Hola {{ $json.query.nombre }}! Tu petición ha sido procesada en tiempo real por n8n.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "a8d05271-6d36-4b1a-954a-243a7ca76a44",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        432,
+        0
+      ],
+      "id": "6842853e-8788-4abc-9285-ccbe2f6bdf35",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2a97510d-94cb-4c36-8bb8-2ecba4e71030",
+  "meta": {
+    "instanceId": "64482d7a14e81689aaebbf703d54e87c821063e375e43c30ccc74d502f1236a9"
+  },
+  "nodeGroups": [],
+  "id": "Tjr2LlXgv6KhHug4",
+  "tags": []
+}
