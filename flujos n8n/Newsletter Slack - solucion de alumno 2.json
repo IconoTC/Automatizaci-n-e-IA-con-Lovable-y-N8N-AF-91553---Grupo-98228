@@ -1,0 +1,605 @@
+{
+  "name": "12. Newsletter con datos filtrados",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        0
+      ],
+      "id": "8a25e1f5-ecac-4904-9a0a-f04ecedb7d2b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/gakudo-ai/open-datasets/main/housing.csv",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -528,
+        0
+      ],
+      "id": "e6c611be-abd7-4b56-8b05-c08d2243044c",
+      "name": "Descargar Dataset",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "bc0ad178-2c7a-4291-acd5-a5668b09d5dd",
+      "name": "Convertir CSV a JSON",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.ocean_proximity }}",
+                    "rightValue": "NEAR OCEAN",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "832d4b7b-caac-40db-975c-0826934d1e88"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "0"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "30e8f503-c114-4d35-894a-d08ad81b22ba",
+                    "leftValue": "={{ $json.ocean_proximity }}",
+                    "rightValue": "INLAND",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ff653ea6-901f-4108-94fe-f76dca1c1484",
+                    "leftValue": "={{ $json.ocean_proximity }}",
+                    "rightValue": "NEAR BAY",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "2"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        -176
+      ],
+      "id": "04de621e-8420-4a1c-9568-2d67182db8f8",
+      "name": "Categorizar por ubicación"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c1601e90-2a8b-43fe-a79d-51f09f9f4769",
+              "leftValue": "={{ $json.median_house_value }}",
+              "rightValue": 200000,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "3848271c-4526-4fd3-a299-9478382151f6",
+      "name": "¿Es cara (>200K)?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6fd52343-7385-4d36-b804-cebd931592db",
+              "name": "Categoria_VIP",
+              "value": "Villa Costera 🏖️",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        -304
+      ],
+      "id": "cc0054f5-7f0c-459b-a5af-ac0d4b7558e1",
+      "name": "Etiqueta Playa"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6fd52343-7385-4d36-b804-cebd931592db",
+              "name": "Categoria_VIP",
+              "value": "Refugio Interior ⛰️",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        -160
+      ],
+      "id": "8fd822fc-d11c-4b81-8cfd-5d283e2c5182",
+      "name": "Etiqueta Interior"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        688,
+        -240
+      ],
+      "id": "aff75ff7-f849-48f4-8c3c-1fa444ae846d",
+      "name": "Unir Catálogo VIP"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "median_house_value"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        304,
+        32
+      ],
+      "id": "24c8ff99-a4c9-4257-ae81-98b5dee72973",
+      "name": "Ordenado por precio"
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        496,
+        32
+      ],
+      "id": "c47ae065-d2ae-4419-83e8-989332b23901",
+      "name": "Top 5 Chollos"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b56849f7-6528-4a79-927b-2c7b0bf5f1c7",
+              "name": "Categoria_VIP",
+              "value": "Chollazo 💸",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        688,
+        32
+      ],
+      "id": "280ae28b-8fd4-44c3-8783-42c24fd220f1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1104,
+        -112
+      ],
+      "id": "32c2cb25-3b94-4872-aaac-491ed20616ae",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Eres un analista inmobiliario.\n\nAnaliza el siguiente conjunto de datos:\n\n{{ JSON.stringify($json.viviendas, null, 2) }}\n\nGenera una newsletter con:\n\n- Título\n- Introducción\n- Listado de viviendas separados por tipos los tipos (incluye los emoticonos que vienen con los datos)\n- Estadísticas interesantes\n- Patrones encontrados\n- Conclusión",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1424,
+        -112
+      ],
+      "id": "5a394410-e997-4c68-a872-251859a83145",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1424,
+        64
+      ],
+      "id": "8a4d85b3-dadc-4407-a33b-129d4a7bc441",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ucy9ZN4J83uM8HDb",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BGU3BFYMN",
+          "mode": "list",
+          "cachedResultName": "bombardeo-de-mensajes"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        1728,
+        -112
+      ],
+      "id": "b36b343e-f47b-45a3-991b-4c1a278ae557",
+      "name": "Mensake Slack",
+      "webhookId": "0230165c-50af-4a15-a3fc-1c673ae6f2ca",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "9QtJaOwc2m838Lkr",
+          "name": "Slack OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -192
+      ],
+      "id": "cbf63748-beef-40c9-944e-4bda66c0bd32",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "const viviendas = $input.all().map(item => item.json);\n\nreturn [\n  {\n    json: {\n      viviendas\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        -112
+      ],
+      "id": "6cf3041d-34c3-40b6-8f25-a11d0b13ca4a",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Descargar Dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convertir CSV a JSON": {
+      "main": [
+        [
+          {
+            "node": "¿Es cara (>200K)?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Dataset": {
+      "main": [
+        [
+          {
+            "node": "Convertir CSV a JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es cara (>200K)?": {
+      "main": [
+        [
+          {
+            "node": "Categorizar por ubicación",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ordenado por precio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorizar por ubicación": {
+      "main": [
+        [
+          {
+            "node": "Etiqueta Playa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Etiqueta Interior",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Etiqueta Playa": {
+      "main": [
+        [
+          {
+            "node": "Unir Catálogo VIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Etiqueta Interior": {
+      "main": [
+        [
+          {
+            "node": "Unir Catálogo VIP",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Ordenado por precio": {
+      "main": [
+        [
+          {
+            "node": "Top 5 Chollos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Top 5 Chollos": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unir Catálogo VIP": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Mensake Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensake Slack": {
+      "main": [
+        []
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a2614022-9105-404d-8620-a16bf5087713",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bec0b4554a87605e329e729de849b357c92b3eab08c54828131a03eb99d7d6c0"
+  },
+  "nodeGroups": [],
+  "id": "oDszFOJB11gjW3tG",
+  "tags": []
+}
