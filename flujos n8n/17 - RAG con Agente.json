@@ -1,0 +1,564 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -16
+      ],
+      "id": "88e23ae7-e325-4379-86a4-044ae8c1f521",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        -16
+      ],
+      "id": "54b1f052-711f-46b2-b85a-966cf53dbd53",
+      "name": "Compression"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "$binary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        -224
+      ],
+      "id": "6331708c-4e56-4ed0-8629-c354e934e76b",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "={{ Object.keys($binary)[0] }}",
+        "destinationKey": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        -128
+      ],
+      "id": "d011f66b-8452-4906-a56e-15d979399e3d",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a36be643-4739-4ba9-86fd-f1c21f9e5a32",
+              "name": "question",
+              "value": "={   \"question\": \"Which Southeast Asian countries are known for islands and beaches?\" }",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        208
+      ],
+      "id": "3c32abd8-7f9a-4150-b1af-29bd8036b9a9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        224,
+        -128
+      ],
+      "id": "18402c9e-efe1-4f9f-aef9-7e55f904dd3c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "url": "https://github.com/gakudo-ai/open-datasets/raw/refs/heads/main/asia_documents.zip",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -384,
+        -192
+      ],
+      "id": "6828ceb7-9b8e-4e1f-be27-b8e51520ae5f",
+      "name": "Obtener documentos "
+    },
+    {
+      "parameters": {
+        "jsCode": "// Tomamos la pregunta del primer item\nconst question = JSON.parse($items()\n                            [0].json.question).question\n\n// Tomar los 9 textos\nconst texts = items.map(i => i.json.text);\n\nreturn [{\n  json: {\n    texts,\n    question\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -128
+      ],
+      "id": "7ba740eb-7061-4d82-91c0-5e5b6a222d1f",
+      "name": "Normalizar consulta"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a retrieval planning agent.\n\nYour task is to analyze the user's question and decide\nhow the system should retrieve information.\n\nYou must return ONLY a valid JSON object with the following fields:\n- retrieval_strategy: \"keyword\" or \"none\"\n- top_k: number\n- reason: short explanation\n\nRules:\n- If the question can be answered from general knowledge,\n  use retrieval_strategy = \"none\".\n- If the question refers to specific documents or regions,\n  use retrieval_strategy = \"keyword\".\n- Keep the JSON concise.\n- Do not include any extra text outside the JSON.\n\nUser question:\n{{ $json.question }}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        640,
+        -128
+      ],
+      "id": "8150a52b-5a92-46af-b763-4ccf27abe60c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        80
+      ],
+      "id": "02411dc9-2def-4753-a022-3c2f6e2e3aed",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "nNpVNgNIMRHVNK2y",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        928,
+        112
+      ],
+      "id": "a3b3b11a-8123-4992-a1c4-dc9e2c27cf7b",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extraer el string\nconst raw = $json.output;\n\n// Eliminar los ```json ``` si existen\nconst cleaned = raw\n  .replace(/```json/g, \"\")\n  .replace(/```/g, \"\")\n  .trim();\n\n// Parsear a objeto\nconst agentDecision = JSON.parse(cleaned);\n\n// Devolver como JSON limpio\nreturn [{\n  json: agentDecision\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        -128
+      ],
+      "id": "47b54c42-f848-4867-a47d-cad43f870d8b",
+      "name": "Formatear decisión del agente"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0e85ee12-e4e8-4b4e-a0c5-618231847696",
+              "leftValue": "={{ $json.retrieval_strategy }}",
+              "rightValue": "none",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1136,
+        112
+      ],
+      "id": "f07bf3aa-cf20-4744-ad73-353fdd67d9b3",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "63e9ebce-86e0-48e3-bb02-d399ebdfbea2",
+              "name": "text",
+              "value": "=You are an assistant that answers questions using your knowledge. \n\nQuestion:\n{{ $json.question }}\n\nAnswer:",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1536,
+        -96
+      ],
+      "id": "1c354b6f-c631-4ae1-b89b-c935f0884f1b",
+      "name": "Construir Prompt Final - versión SIMPLE"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Tomamos la pregunta\nconst question = $json.question.toLowerCase();\n \n// Generamos palabras clave (filtro simple)\nconst keywords = question.split(/\\W+/).filter(k => k.length > 3);\n \n// Tomamos los textos\nconst texts = $json.texts;\n \n// Score simple: contar coincidencias de palabras clave\nconst scoredDocs = texts.map(text => {\n  const t = text.toLowerCase();\n  let score = 0;\n  for (const kw of keywords) {\n    if (t.includes(kw)) score++;\n  }\n  return { text, score };\n});\n \n// Orden descendente por score\nscoredDocs.sort((a, b) => b.score - a.score);\n \n// Seleccionamos top 3 documentos\nconst topDocs = scoredDocs.slice(0, 3).map(d => d.text);\n \n// Salida: 1 item con topDocs + pregunta\nreturn [{\n  json: {\n    texts: topDocs, // array con los 3 textos relevantes\n    question\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        288
+      ],
+      "id": "0502f9d7-08c4-4cbc-985c-bd26c9e924f5",
+      "name": "Retriever"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c0e8d811-1d64-45f5-b827-71f5cdb3d88c",
+              "name": "text",
+              "value": "=You are an assistant that answers questions using the context below combined with your knowledge.\n\nContext: --- \n{{ $json.texts.join(\"\\n \\n\") }}\n\nQuestion:\n{{ $json.question }} \n\nAnswer:",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1552,
+        288
+      ],
+      "id": "9963fabd-7a44-47fb-8497-cca32410a14d",
+      "name": "Construir PROMPT Final AUMENTADO"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1840,
+        96
+      ],
+      "id": "1681928d-9945-46e5-bc52-0325f58219aa",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "nNpVNgNIMRHVNK2y",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1760,
+        -96
+      ],
+      "id": "5628d3ac-5c59-41b2-a104-4215115ee693",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1760,
+        304
+      ],
+      "id": "2c2a8587-cde7-4b5c-8174-91e473e327af",
+      "name": "Basic LLM Chain1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Obtener documentos ",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compression": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Normalizar consulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener documentos ": {
+      "main": [
+        [
+          {
+            "node": "Compression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar consulta": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Formatear decisión del agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear decisión del agente": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Construir Prompt Final - versión SIMPLE",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retriever",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retriever": {
+      "main": [
+        [
+          {
+            "node": "Construir PROMPT Final AUMENTADO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construir Prompt Final - versión SIMPLE": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construir PROMPT Final AUMENTADO": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0d1bc3a8-e8c8-4b4c-8d7e-b1fd9915f02a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64482d7a14e81689aaebbf703d54e87c821063e375e43c30ccc74d502f1236a9"
+  },
+  "nodeGroups": [],
+  "id": "GIQeodP2pLxcrOn8",
+  "tags": []
+}

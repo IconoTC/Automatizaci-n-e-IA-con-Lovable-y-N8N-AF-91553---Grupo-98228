@@ -1,0 +1,327 @@
+{
+  "name": "17 - BBDD Vectorial Pinecone",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        528
+      ],
+      "id": "29a1d5b9-5b21-4bf3-9624-8adbc42768dd",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        528
+      ],
+      "id": "33824875-133b-44cf-84f8-36e30b254fbd",
+      "name": "Descomprimir ZIP"
+    },
+    {
+      "parameters": {
+        "url": "https://github.com/gakudo-ai/open-datasets/raw/refs/heads/main/asia_documents.zip",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        416,
+        528
+      ],
+      "id": "8557e1df-957d-4cd6-97a4-ddf6aacc06cb",
+      "name": "Obtener Dataset ZIP de Github"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "$binary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        832,
+        528
+      ],
+      "id": "fe965f3c-730a-4e54-9faf-3cceb47e73d6",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "={{ Object.keys($binary)[0] }}",
+        "destinationKey": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1040,
+        528
+      ],
+      "id": "7e0abd2a-2c8b-4fed-9dcf-15f364653d94",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => ({\n  json: {\n    inputs: item.json.text,  // Un texto a la vez\n    options: { wait_for_model: true }\n  },\n  pairedItem: { item: item.index }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        528
+      ],
+      "id": "d82a2262-b96d-4272-b2ee-a17fe8a120b4",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Extraer todos los números\nconst allNumbers = items.map(item => item.json);\n\n// Dimensión del embedding del modelo bge-large-en-v1.5  en Hugging Face\nconst embeddingDim = 384;\n\n// Calcular cuántos documentos hay\nconst numDocs = Math.floor(allNumbers.length / embeddingDim);\n\n// Reagrupar en vectores de 384 dimensiones\nconst vectors = [];\nfor (let i = 0; i < numDocs; i++) {\n  const start = i * embeddingDim;\n  const end = start + embeddingDim;\n  const embedding = allNumbers.slice(start, end);\n  \n  vectors.push({\n    id: `doc-${i + 1}`,\n    values: embedding,\n    metadata: {\n      text: `Documento ${i + 1}`\n    }\n  });\n}\n\nreturn [{ json: { vectors } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        720
+      ],
+      "id": "69ef5e06-722e-4364-8c75-bd82a27cd9ea",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://router.huggingface.co/hf-inference/models/BAAI/bge-small-en-v1.5/pipeline/feature-extraction",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1456,
+        528
+      ],
+      "id": "a6dd5efc-cc1f-480e-9916-f81422fc8215",
+      "name": "HF Embedding Model",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://asia-docs-6ye29tu.svc.aped-4627-b74a.pinecone.io/vectors/upsert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "pcsk_3ZU44Z_UXUewyFP19Rq64pRCdqaHBWCUcsRdPYeDSyoEi9fCdXhw6YvRRx2DJnMZmgLK9A"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        592,
+        720
+      ],
+      "id": "4c766c63-669e-4ae5-bc80-eb2f54e75d05",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "https://asia-docs-6ye29tu.svc.aped-4627-b74a.pinecone.io/vectors/fetch",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "doc-1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Api-Key",
+              "value": "pcsk_3ZU44Z_UXUewyFP19Rq64pRCdqaHBWCUcsRdPYeDSyoEi9fCdXhw6YvRRx2DJnMZmgLK9A"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        416,
+        368
+      ],
+      "id": "f8421bf1-6e5a-499e-b985-d2794c390878",
+      "name": "Leer Embedding"
+    },
+    {
+      "parameters": {
+        "content": "## IMPORTANTE \nEn varios de los nodos HTTP de esta plantilla de flujo, tendrás que especificar tus propias API Keys de Hugging Face y Pinecone en los campos de 'header' correspondientes.\nTambién deberás reemplazar la URL de acceso al Index de Pinecone por el de tu propia BBDD vectorial",
+        "height": 240,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        944,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "7b532345-a1b8-43b4-9a3f-19b5f3a52b44",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Obtener Dataset ZIP de Github",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Leer Embedding",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Dataset ZIP de Github": {
+      "main": [
+        [
+          {
+            "node": "Descomprimir ZIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descomprimir ZIP": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HF Embedding Model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HF Embedding Model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b40d700c-cf1c-4d22-832d-228e05ea5690",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64482d7a14e81689aaebbf703d54e87c821063e375e43c30ccc74d502f1236a9"
+  },
+  "nodeGroups": [],
+  "id": "MS40qWMVdXyG0YdY",
+  "tags": []
+}
